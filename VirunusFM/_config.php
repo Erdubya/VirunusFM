@@ -5,9 +5,9 @@
  * Time: 17:29
  */
 
-require_once("_functions.php");
+require_once( "_functions.php" );
 
- define("DB_USERNAME", "virunus");
- define("DB_PASSWORD", "music@work");
- define("DB_HOSTNAME", "localhost");
- define("DB_DATABASE", "virunus_fm");
+define("DB_USERNAME", "virunus");
+define("DB_PASSWORD", "music@work");
+define("DB_HOSTNAME", "localhost");
+define("DB_DATABASE", "virunus_fm");

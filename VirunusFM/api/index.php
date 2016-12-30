@@ -6,7 +6,7 @@
  * This is the main API file for VirunusFM.  Calls for the web service will
  * generate from here following an http request.
  */
-require_once("../_config.php");
+require_once( "../_config.php" );
 
 if (isset($_POST['api_key'])) {
 
