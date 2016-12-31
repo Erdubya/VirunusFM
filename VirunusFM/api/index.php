@@ -7,13 +7,15 @@
  * generate from here following an http request.
  */
 require_once "../_config.php";
+global $config;
 include "read.php";
 include "write.php";
 include "response.php";
 
-$dbh = db_connect() or die(DB_CONNERR);
+$dbh = db_connect() or die($config->database->errors->connect);
 unset($auth_err);
 $response = new Response();
+$request = json_decode($_POST, true);
 
 // Get API data from DB.
 $api = $_POST['api_key'];
@@ -26,10 +28,9 @@ if ($row !== false) {
 }
 
 // Validate API and authenticate user.
-if (checkAPI($row)) {
+if (check_client($row)) {
 	if (isset($_POST['username'])) {
-		$sql      = "SELECT password FROM users WHERE username = "
-		            . $_POST['username'];
+		$sql      = "SELECT password FROM users WHERE username = " . $_POST['username'];
 		$user_row = $dbh->query($sql)->fetch();
 
 		if (is_null($user_row)) {
@@ -47,10 +48,13 @@ if (checkAPI($row)) {
 }
 
 header("Content-type: application/json");
-if (isset($auth_err)) {
-	echo json_encode($auth_err);
-	die();
-}
+//if (isset($auth_err)) {
+//	echo json_encode($auth_err);
+//	die();
+//}
+
+echo json_encode($_POST);
+die();
 
 switch (strtolower($_POST["method"])) {
 	case "write":
@@ -74,7 +78,7 @@ echo json_encode($_POST);
  *
  * @return bool
  */
-function checkAPI($row)
+function check_client($row)
 {
 	if (is_a($row, "boolean")) {
 		return false;
@@ -103,7 +107,8 @@ function write($write)
 	$write->setTrack($_POST["track"]);
 	$write->setAlbum($_POST["album"]);
 	$write->setDatetime($_POST["datetime"]);
-	
+	$write->listen();
+	return true;
 }
 
 /**
