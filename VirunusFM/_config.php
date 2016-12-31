@@ -11,3 +11,4 @@ define("DB_USERNAME", "virunus");
 define("DB_PASSWORD", "music@work");
 define("DB_HOSTNAME", "localhost");
 define("DB_DATABASE", "virunus_fm");
+define("DB_CONNERR", "Cannot connect to database!");
