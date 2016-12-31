@@ -5,7 +5,8 @@
  * Time: 17:29
  */
 
-require_once( "_functions.php" );
+require_once "_functions.php";
+require_once "vendor/autoload.php";
 
 define("DB_USERNAME", "virunus");
 define("DB_PASSWORD", "music@work");
