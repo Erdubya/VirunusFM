@@ -7,12 +7,11 @@
  * generate from here following an http request.
  */
 require_once "../_config.php";
-global $config;
 include "read.php";
 include "write.php";
 include "response.php";
 
-$dbh = db_connect() or die($config->database->errors->connect);
+$dbh = db_connect() or die(DB_CONNERR);
 unset($auth_err);
 $response = new Response();
 $request = json_decode($_POST, true);
@@ -30,7 +29,8 @@ if ($row !== false) {
 // Validate API and authenticate user.
 if (check_client($row)) {
 	if (isset($_POST['username'])) {
-		$sql      = "SELECT password FROM users WHERE username = " . $_POST['username'];
+		$sql      = "SELECT password FROM users WHERE username = "
+		            . $_POST['username'];
 		$user_row = $dbh->query($sql)->fetch();
 
 		if (is_null($user_row)) {

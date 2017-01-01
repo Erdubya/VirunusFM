@@ -5,9 +5,6 @@
  * Time: 14:14
  */
 require_once "../_config.php";
-global $config;
-var_dump($config);
-
 $url = "http://api.virun.us:8080";
 $auth = "39802830831bed188884e193d8465226";
 $listens = array();

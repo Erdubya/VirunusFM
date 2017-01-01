@@ -9,9 +9,8 @@
  */
 
 require_once "../_config.php";
-global $config;
 
-$dbh = db_connect() or die($config->database->errors->connect);
+$dbh = db_connect() or die(DB_CONNERR);
 $username = $_POST['username'];
 $password = $_POST['password'];
 $client = $_POST['api_key'];
@@ -38,6 +37,6 @@ if ($pswd && $clnt) {
 	//  changed in the future.
 	$token_id = base64_encode(mcrypt_create_iv(32));
 	$issued_at = time();
-	$server_name = $config->webhost;
+	$server_name = 
 }
 
