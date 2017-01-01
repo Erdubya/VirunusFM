@@ -16,4 +16,5 @@ define("DB_DATABASE", "virunus_fm");
 
 define("API_URI", "api.virun.us:8080");
 
-define("JWT_KEY", "F9X6acLbbc/eD8vkatOUUpWUVBVz6V1ewV88NlkzZOR2/rzO2O1fRXKUuFUjSn1oRuRHJD0O2fgCT2GrCDKVag==");
+define("JWT_KEY",
+	"F9X6acLbbc/eD8vkatOUUpWUVBVz6V1ewV88NlkzZOR2/rzO2O1fRXKUuFUjSn1oRuRHJD0O2fgCT2GrCDKVag==");

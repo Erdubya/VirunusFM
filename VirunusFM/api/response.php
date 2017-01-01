@@ -21,8 +21,15 @@ class Response {
 	/**
 	 * @param int $error
 	 */
-	public function set_error($error) {
+	public function set_error($error)
+	{
 		$this->error = $error;
+	}
+
+	public function display()
+	{
+		$response = json_encode($this);
+		echo $response;
 	}
 
 }

@@ -8,7 +8,6 @@
  */
 require_once "../_config.php";
 include "read.php";
-include "write.php";
 include "response.php";
 use \Firebase\JWT\JWT;
 
@@ -16,40 +15,31 @@ $dbh = db_connect() or die(DB_CONNERR);
 unset($auth_err);
 $response = new Response();
 
-// Get API data from DB.
-//$api = $_POST['api_key'];
-//$sql = "SELECT * FROM clients where api_key = $api";
-//$row = $dbh->query($sql);
-//if ($row !== false) {
-//	$row = $row->fetch();
-//} else {
-//	$response->set_error(Errors::API);
-//}
-
-header("Content-type: application/json");
+$method = $_POST['method'];
+$data = $_POST['data'];
 
 // Validate API and authenticate user.
-$jwt = $_POST['token'];
+$jwt = $data['token'];
 try {
-	$token = JWT::decode($jwt, JWT_KEY, [ 'HS256' ]);
-	echo json_encode(['token' => $token]);
-} catch (Exception $e) {
-	echo json_encode(['error' => $e->getMessage()]);
+	$token = JWT::decode($jwt, 'secret', ['HS256']);
+	
+	$user_id = $token['user_id'];
+	$client = $token['client'];
+	
+	//TODO: implement response handlers.
+} catch (\Firebase\JWT\BeforeValidException $e) {
+	echo json_encode($e->getMessage());
+} catch (\Firebase\JWT\ExpiredException $e) {
+	echo json_encode($e->getMessage());
+} catch (\Firebase\JWT\SignatureInvalidException $e) {
+	echo json_encode($e->getMessage());
+} catch (UnexpectedValueException $e) {
+	echo json_encode($e->getMessage());
 }
 
-//if (isset($auth_err)) {
-//	echo json_encode($auth_err);
-//	die();
-//}
-
-//echo json_encode($_POST);
-die();
-
-switch (strtolower($_POST["method"])) {
+switch (strtolower($method)) {
 	case "write":
-		if (!write(new Write())) {
-			$response->set_error(Errors::DATA);
-		}
+		write($data['listens'], $user_id, $client);
 		break;
 	case "read":
 		read(new Read());
@@ -59,8 +49,8 @@ switch (strtolower($_POST["method"])) {
 		break;
 }
 
-$methods = array_keys($_POST);
-echo json_encode($_POST);
+header("Content-type: application/json");
+$response->display();
 
 /**
  * @param mixed $row
@@ -73,31 +63,29 @@ function check_client($row)
 		return false;
 	} else if (is_null($row)) {
 		return false;
-	} else if ( ! $row['active']) {
+	} else if ( !$row['active']) {
 		return false;
 	} else {
-		return ( strtotime($row['expires']) > time() );
+		return (strtotime($row['expires']) > time());
 	}
 }
 
-/**
- * @param Write $write
- * 
- * @return bool
- */
-function write($write)
+function write($listens, $user, $client)
 {
-	$keys = array_keys($_POST);
-	if (!$write->check_data($keys)) {
-		return false;
+	$result = array('Y' => 0, 'N' => 0);
+	foreach ($listens as $listen) {
+		if (
+			array_key_exists('artist', $listen)
+			&& array_key_exists('track', $listen)
+			&& array_key_exists('album', $listen)
+			&& array_key_exists('datetime', $listen)
+		) {
+			list($artist, $track, $album, $datetime) = $listen;
+			
+			//TODO: lookup data in tables; record track.
+		}
+
 	}
-	
-	$write->setArtist($_POST["artist"]);
-	$write->setTrack($_POST["track"]);
-	$write->setAlbum($_POST["album"]);
-	$write->setDatetime($_POST["datetime"]);
-	$write->listen();
-	return true;
 }
 
 /**
@@ -105,5 +93,5 @@ function write($write)
  */
 function read($read)
 {
-	
+
 }

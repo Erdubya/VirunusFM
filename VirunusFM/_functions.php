@@ -17,6 +17,12 @@ function db_connect()
 	return $dbh;
 }
 
+function var_dump_to_str($var) {
+	ob_start();
+	var_dump($var);
+	return ob_get_clean();
+}
+
 abstract class Errors extends BasicEnum {
 	const API = 1;
 	const AUTH = 2;
@@ -25,21 +31,10 @@ abstract class Errors extends BasicEnum {
 }
 
 abstract class BasicEnum {
-	private static $constCacheArray = NULL;
+	private static $constCacheArray = null;
 
-	private static function getConstants() {
-		if (self::$constCacheArray == NULL) {
-			self::$constCacheArray = [];
-		}
-		$calledClass = get_called_class();
-		if (!array_key_exists($calledClass, self::$constCacheArray)) {
-			$reflect = new ReflectionClass($calledClass);
-			self::$constCacheArray[$calledClass] = $reflect->getConstants();
-		}
-		return self::$constCacheArray[$calledClass];
-	}
-
-	public static function isValidName($name, $strict = false) {
+	public static function isValidName($name, $strict = false)
+	{
 		$constants = self::getConstants();
 
 		if ($strict) {
@@ -47,11 +42,28 @@ abstract class BasicEnum {
 		}
 
 		$keys = array_map('strtolower', array_keys($constants));
+
 		return in_array(strtolower($name), $keys);
 	}
 
-	public static function isValidValue($value, $strict = true) {
+	private static function getConstants()
+	{
+		if (self::$constCacheArray == null) {
+			self::$constCacheArray = [];
+		}
+		$calledClass = get_called_class();
+		if ( !array_key_exists($calledClass, self::$constCacheArray)) {
+			$reflect                               = new ReflectionClass($calledClass);
+			self::$constCacheArray[ $calledClass ] = $reflect->getConstants();
+		}
+
+		return self::$constCacheArray[ $calledClass ];
+	}
+
+	public static function isValidValue($value, $strict = true)
+	{
 		$values = array_values(self::getConstants());
+
 		return in_array($value, $values, $strict);
 	}
 }
