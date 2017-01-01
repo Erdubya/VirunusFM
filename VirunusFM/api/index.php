@@ -10,50 +10,39 @@ require_once "../_config.php";
 include "read.php";
 include "write.php";
 include "response.php";
+use \Firebase\JWT\JWT;
 
 $dbh = db_connect() or die(DB_CONNERR);
 unset($auth_err);
 $response = new Response();
-$request = json_decode($_POST, true);
 
 // Get API data from DB.
-$api = $_POST['api_key'];
-$sql = "SELECT * FROM clients where api_key = $api";
-$row = $dbh->query($sql);
-if ($row !== false) {
-	$row = $row->fetch();
-} else {
-	$response->set_error(Errors::API);
-}
-
-// Validate API and authenticate user.
-if (check_client($row)) {
-	if (isset($_POST['username'])) {
-		$sql      = "SELECT password FROM users WHERE username = "
-		            . $_POST['username'];
-		$user_row = $dbh->query($sql)->fetch();
-
-		if (is_null($user_row)) {
-			$auth_err = 2;
-		} else if ( ! password_verify($_POST["password"],
-			$user_row["password"])
-		) {
-			$auth_err = 2;
-		}
-	} else {
-		$auth_err = 2;
-	}
-} else {
-	$auth_err = 1;
-}
+//$api = $_POST['api_key'];
+//$sql = "SELECT * FROM clients where api_key = $api";
+//$row = $dbh->query($sql);
+//if ($row !== false) {
+//	$row = $row->fetch();
+//} else {
+//	$response->set_error(Errors::API);
+//}
 
 header("Content-type: application/json");
+
+// Validate API and authenticate user.
+$jwt = $_POST['token'];
+try {
+	$token = JWT::decode($jwt, JWT_KEY, [ 'HS256' ]);
+	echo json_encode(['token' => $token]);
+} catch (Exception $e) {
+	echo json_encode(['error' => $e->getMessage()]);
+}
+
 //if (isset($auth_err)) {
 //	echo json_encode($auth_err);
 //	die();
 //}
 
-echo json_encode($_POST);
+//echo json_encode($_POST);
 die();
 
 switch (strtolower($_POST["method"])) {

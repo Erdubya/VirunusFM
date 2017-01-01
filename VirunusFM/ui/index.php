@@ -6,7 +6,7 @@
  */
 require_once "../_config.php";
 $url = "http://api.virun.us:8080";
-$auth = "39802830831bed188884e193d8465226";
+$auth = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ";
 $listens = array();
 
 for ($i = 0; $i < 10; $i++) {
@@ -19,7 +19,7 @@ for ($i = 0; $i < 10; $i++) {
 	array_push($listens, $listen);
 }
 
-$object = array("auth" => $auth, "listens" => $listens);
+$object = array("token" => $auth, "listens" => $listens);
 
 $options = array(
 	'http' => array(
@@ -38,6 +38,7 @@ if ($result === FALSE) {
 //	echo $result;
 //	echo json_decode($result);
 	var_dump($result);
+	echo "<br/>";
 	var_dump(json_decode($result));
 }
 

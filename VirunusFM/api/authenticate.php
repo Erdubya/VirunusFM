@@ -9,6 +9,7 @@
  */
 
 require_once "../_config.php";
+use Firebase\JWT\JWT;
 
 $dbh = db_connect() or die(DB_CONNERR);
 $username = $_POST['username'];
@@ -37,6 +38,24 @@ if ($pswd && $clnt) {
 	//  changed in the future.
 	$token_id = base64_encode(mcrypt_create_iv(32));
 	$issued_at = time();
-	$server_name = 
+	$server_name = "http://" . $_SERVER['SERVER_NAME'];
+	$expires = strtotime($result['expires']) - time();
+	
+	$data = [
+		'iat' => $issued_at,
+		'jti' => $token_id,
+		'iss' => $server_name,
+		'exp' => $expires,
+		'data' => [
+			'username' => $username,
+			'client' => $client
+		]
+	];
+	
+	$jwt = JWT::encode($data, JWT_KEY, 'HS512');
+	
+	echo json_encode(['jwt' => $jwt]);
+} else {
+	echo json_encode(['error' => "invalid information"]);
 }
 
