@@ -10,22 +10,23 @@ require_once "../_config.php";
 include "read.php";
 include "response.php";
 use \Firebase\JWT\JWT;
+header("Content-type: application/json");
 
 $dbh = db_connect() or die(DB_CONNERR);
 unset($auth_err);
 $response = new Response();
 
 $method = $_POST['method'];
-$data = $_POST['data'];
+$data   = $_POST['data'];
 
 // Validate API and authenticate user.
 $jwt = $data['token'];
 try {
 	$token = JWT::decode($jwt, 'secret', ['HS256']);
-	
-	$user_id = $token['user_id'];
-	$client = $token['client'];
-	
+
+	$response->setUser($token->user_id, $token->username);
+	$response->setClient($token->client);
+
 	//TODO: implement response handlers.
 } catch (\Firebase\JWT\BeforeValidException $e) {
 	echo json_encode($e->getMessage());
@@ -37,20 +38,19 @@ try {
 	echo json_encode($e->getMessage());
 }
 
-switch (strtolower($method)) {
-	case "write":
-		write($data['listens'], $user_id, $client);
-		break;
-	case "read":
-		read(new Read());
-		break;
-	default:
-		$response->set_error(Errors::METHOD);
-		break;
-}
+//switch (strtolower($method)) {
+//	case "write":
+//		write($dbh, $response, $data['listens']);
+//		break;
+//	case "read":
+//		read(new Read());
+//		break;
+//	default:
+//		$response->add_error(Errors::METHOD);
+//		break;
+//}
 
-header("Content-type: application/json");
-$response->display();
+$response->respond();
 
 /**
  * @param mixed $row
@@ -70,9 +70,13 @@ function check_client($row)
 	}
 }
 
-function write($listens, $user, $client)
+/**
+ * @param PDO $dbh
+ * @param Response $response
+ * @param array $listens
+ */
+function write($dbh, $response, $listens)
 {
-	$result = array('Y' => 0, 'N' => 0);
 	foreach ($listens as $listen) {
 		if (
 			array_key_exists('artist', $listen)
@@ -81,10 +85,50 @@ function write($listens, $user, $client)
 			&& array_key_exists('datetime', $listen)
 		) {
 			list($artist, $track, $album, $datetime) = $listen;
-			
-			//TODO: lookup data in tables; record track.
-		}
 
+			// Get artist ID.
+			$stmt = $dbh->prepare("SELECT artist_id FROM artists WHERE name = ?");
+			if ($stmt->execute([$artist])) {
+				$artist_id = $stmt->fetch()[0];
+			} else {
+				$artist_id = 0;
+			}
+
+			// Get album ID
+			$stmt = $dbh->prepare("SELECT album_id FROM albums WHERE artist_id = $artist_id AND title = $album");
+			if ($stmt->execute([$artist_id, $album])) {
+				$album_id = $stmt->fetch()[0];
+			} else {
+				$album_id = 0;
+			}
+
+			// Get track ID
+			$stmt = $dbh->prepare("SELECT track_id FROM tracks WHERE album_id = ? AND title = ?");
+			if ($stmt->execute([$album_id, $track])) {
+				$track_id = $stmt->fetch()[0];
+			} else {
+				// Add a new track
+				$stmt = $dbh->prepare("INSERT INTO tracks(album_id, title) VALUES (?, ?)");
+				$stmt->execute([$album_id, $track]);
+				$track_id = $dbh->lastInsertId();
+			}
+
+			// Submit listen
+			$stmt = $dbh->prepare("INSERT INTO listens(user_id, artist_id,album_id, track_id, api_key, datetime) VALUES (:user_id, :artist, :album, :track, :client, :datetime)");
+			if ($stmt->execute([
+				'user_id'  => $response->getUser()[0],
+				'artist'   => $artist_id,
+				'album'    => $album_id,
+				'track'    => $track_id,
+				'client'   => $response->getClient(),
+				'datetime' => $datetime
+			])) {
+				$status = "success";				
+			} else {
+				$status = "failure";
+			}
+			$response->add_listen([$status, $artist, $album, $track, $datetime]);
+		}
 	}
 }
 

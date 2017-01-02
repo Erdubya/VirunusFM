@@ -9,27 +9,83 @@
 require_once "../_config.php";
 
 class Response {
-	private $artist;
-	private $track;
-	private $album;
-	private $datetime;
 	/**
-	 * @var int
+	 * @var array
 	 */
-	private $error;
+	private $user = [];
+	/**
+	 * @var string
+	 */
+	private $client;
+	/**
+	 * @var array
+	 */
+	private $errors = [];
+	
+	private $listens = [];
+
+	/**
+	 * @param int $user_id
+	 * @param string $username
+	 */
+	public function setUser($user_id, $username)
+	{
+		$this->user[0] = $user_id;
+		$this->user[1] = $username;
+	}
+
+	/**
+	 * Returns the api_key of the client.
+	 * @param string $client
+	 */
+	public function setClient($client)
+	{
+		$this->client = $client;
+	}
+
+	/**
+	 * Returns an array containing the UserID as the first element, and the
+	 * username as the second.
+	 * @return string
+	 */
+	public function getUser()
+	{
+		return $this->user;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getClient()
+	{
+		return $this->client;
+	}
 
 	/**
 	 * @param int $error
 	 */
-	public function set_error($error)
+	public function add_error($error)
 	{
-		$this->error = $error;
+		array_push($this->errors, $error);
 	}
 
-	public function display()
+	/**
+	 * @param array $listen
+	 */
+	public function add_listen($listen) {
+		array_push($this->listens, $listen);
+	}
+
+	public function respond()
 	{
-		$response = json_encode($this);
+		$response = json_encode($this->build_array());
 		echo $response;
+	}
+	
+	private function build_array() {
+		$VirunusFM = [];
+		
+		return $VirunusFM;
 	}
 
 }
