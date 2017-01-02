@@ -1,6 +1,5 @@
 {
     "require": {
-        "firebase/php-jwt": "^4.0",
-        "ccampbell/chromephp": "^4.1"
+        "firebase/php-jwt": "^4.0"
     }
 }

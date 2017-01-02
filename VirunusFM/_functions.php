@@ -10,6 +10,7 @@ function db_connect()
 	try {
 		$dbh = new PDO("pgsql:host=" . DB_HOSTNAME . ";dbname=" . DB_DATABASE,
 			DB_USERNAME, DB_PASSWORD);
+		$dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 	} catch (PDOException $e) {
 		$dbh = null;
 	}
@@ -17,9 +18,11 @@ function db_connect()
 	return $dbh;
 }
 
-function var_dump_to_str($var) {
+function var_dump_to_str($var)
+{
 	ob_start();
 	var_dump($var);
+
 	return ob_get_clean();
 }
 

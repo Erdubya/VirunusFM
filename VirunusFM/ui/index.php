@@ -39,7 +39,7 @@ if ($result === false) {
 //	echo json_decode($result);
 	var_dump($result);
 	echo "<br/>";
-	var_dump(json_decode($result));
+	var_dump(json_decode($result, true));
 }
 
 

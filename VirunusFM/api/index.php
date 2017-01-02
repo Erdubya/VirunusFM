@@ -10,6 +10,7 @@ require_once "../_config.php";
 include "read.php";
 include "response.php";
 use \Firebase\JWT\JWT;
+
 header("Content-type: application/json");
 
 $dbh = db_connect() or die(DB_CONNERR);
@@ -86,48 +87,63 @@ function write($dbh, $response, $listens)
 		) {
 			list($artist, $track, $album, $datetime) = $listen;
 
-			// Get artist ID.
-			$stmt = $dbh->prepare("SELECT artist_id FROM artists WHERE name = ?");
-			if ($stmt->execute([$artist])) {
-				$artist_id = $stmt->fetch()[0];
-			} else {
-				$artist_id = 0;
-			}
+			try {
+				// Get artist ID.
+				$stmt = $dbh->prepare("SELECT artist_id FROM artists WHERE name = ?");
+				if ($stmt->execute([$artist])) {
+					$artist_id = $stmt->fetch()[0];
+				} else {
+					$artist_id = 0;
+					$artist = "Unknown Artist";
+				}
 
-			// Get album ID
-			$stmt = $dbh->prepare("SELECT album_id FROM albums WHERE artist_id = $artist_id AND title = $album");
-			if ($stmt->execute([$artist_id, $album])) {
-				$album_id = $stmt->fetch()[0];
-			} else {
-				$album_id = 0;
-			}
+				// Get album ID
+				$stmt = $dbh->prepare("SELECT album_id FROM albums WHERE artist_id = $artist_id AND title = $album");
+				if ($stmt->execute([$artist_id, $album])) {
+					$album_id = $stmt->fetch()[0];
+				} else {
+					$album_id = 0;
+					$album = "Unknown Album";
+				}
 
-			// Get track ID
-			$stmt = $dbh->prepare("SELECT track_id FROM tracks WHERE album_id = ? AND title = ?");
-			if ($stmt->execute([$album_id, $track])) {
-				$track_id = $stmt->fetch()[0];
-			} else {
-				// Add a new track
-				$stmt = $dbh->prepare("INSERT INTO tracks(album_id, title) VALUES (?, ?)");
-				$stmt->execute([$album_id, $track]);
-				$track_id = $dbh->lastInsertId();
-			}
+				// Get track ID
+				$stmt = $dbh->prepare("SELECT track_id FROM tracks WHERE album_id = ? AND title = ?");
+				if ($stmt->execute([$album_id, $track])) {
+					$track_id = $stmt->fetch()[0];
+				} else {
+					// Add a new track
+					$stmt = $dbh->prepare("INSERT INTO tracks(album_id, title) VALUES (?, ?)");
+					$stmt->execute([$album_id, $track]);
+					$track_id = $dbh->lastInsertId();
+				}
 
-			// Submit listen
-			$stmt = $dbh->prepare("INSERT INTO listens(user_id, artist_id,album_id, track_id, api_key, datetime) VALUES (:user_id, :artist, :album, :track, :client, :datetime)");
-			if ($stmt->execute([
-				'user_id'  => $response->getUser()[0],
-				'artist'   => $artist_id,
-				'album'    => $album_id,
-				'track'    => $track_id,
-				'client'   => $response->getClient(),
-				'datetime' => $datetime
-			])) {
-				$status = "success";				
-			} else {
+				// Submit listen
+				$stmt = $dbh->prepare("INSERT INTO listens(user_id, artist_id,album_id, track_id, api_key, datetime) VALUES (:user_id, :artist, :album, :track, :client, :datetime)");
+				if ($stmt->execute([
+					'user_id'  => $response->getUser()[0],
+					'artist'   => $artist_id,
+					'album'    => $album_id,
+					'track'    => $track_id,
+					'client'   => $response->getClient(),
+					'datetime' => $datetime
+				])
+				) {
+					$status = "success";
+				} else {
+					$status = "failure";
+				}
+			} catch (PDOException $e) {
 				$status = "failure";
 			}
-			$response->add_listen([$status, $artist, $album, $track, $datetime]);
+
+			// Add response
+			$response->add_listen([
+				'status'   => $status,
+				'artist'   => $artist,
+				'album'    => $album,
+				'track'    => $track,
+				'datetime' => $datetime
+			]);
 		}
 	}
 }

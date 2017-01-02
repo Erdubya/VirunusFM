@@ -10,29 +10,30 @@ require_once "../_config.php";
 
 class Response {
 	/**
-	 * @var array
-	 */
-	private $user = [];
-	/**
 	 * @var string
 	 */
 	private $client;
+
+	/**
+	 * @var string
+	 */
+	private $method;
+	
+	/**
+	 * @var array
+	 */
+	private $user = [];
+	
 	/**
 	 * @var array
 	 */
 	private $errors = [];
-	
-	private $listens = [];
 
 	/**
-	 * @param int $user_id
-	 * @param string $username
+	 * @var array
 	 */
-	public function setUser($user_id, $username)
-	{
-		$this->user[0] = $user_id;
-		$this->user[1] = $username;
-	}
+	private $listens = [];
+
 
 	/**
 	 * Returns the api_key of the client.
@@ -41,6 +42,20 @@ class Response {
 	public function setClient($client)
 	{
 		$this->client = $client;
+	}
+	
+	public function setMethod($method)
+	{
+		$this->method = $method;
+	}
+	/**
+	 * @param int $user_id
+	 * @param string $username
+	 */
+	public function setUser($user_id, $username)
+	{
+		$this->user[0] = $user_id;
+		$this->user[1] = $username;
 	}
 
 	/**
@@ -78,14 +93,15 @@ class Response {
 
 	public function respond()
 	{
-		$response = json_encode($this->build_array());
+		$response = json_encode(['VirunusFM' => $this->build_array()]);
 		echo $response;
 	}
 	
 	private function build_array() {
-		$VirunusFM = [];
-		
-		return $VirunusFM;
+		$response = [];
+		$response['method'] = $this->method;
+		$response['listens'] = $this->listens;
+		return $response;
 	}
 
 }
