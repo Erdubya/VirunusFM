@@ -18,12 +18,17 @@ class Response {
 	 * @var string
 	 */
 	private $method;
-	
+
 	/**
-	 * @var array
+	 * @var string
 	 */
-	private $user = [];
-	
+	private $username;
+
+	/**
+	 * @var int
+	 */
+	private $user_id;
+
 	/**
 	 * @var array
 	 */
@@ -34,28 +39,19 @@ class Response {
 	 */
 	private $listens = [];
 
-
-	/**
-	 * Returns the api_key of the client.
-	 * @param string $client
-	 */
-	public function setClient($client)
-	{
-		$this->client = $client;
-	}
-	
 	public function setMethod($method)
 	{
 		$this->method = $method;
 	}
+
 	/**
 	 * @param int $user_id
 	 * @param string $username
 	 */
 	public function setUser($user_id, $username)
 	{
-		$this->user[0] = $user_id;
-		$this->user[1] = $username;
+		$this->user_id  = $user_id;
+		$this->username = $username;
 	}
 
 	/**
@@ -63,9 +59,9 @@ class Response {
 	 * username as the second.
 	 * @return string
 	 */
-	public function getUser()
+	public function getUserID()
 	{
-		return $this->user;
+		return $this->user_id;
 	}
 
 	/**
@@ -74,6 +70,16 @@ class Response {
 	public function getClient()
 	{
 		return $this->client;
+	}
+
+	/**
+	 * Returns the api_key of the client.
+	 *
+	 * @param string $client
+	 */
+	public function setClient($client)
+	{
+		$this->client = $client;
 	}
 
 	/**
@@ -87,7 +93,8 @@ class Response {
 	/**
 	 * @param array $listen
 	 */
-	public function add_listen($listen) {
+	public function add_listen($listen)
+	{
 		array_push($this->listens, $listen);
 	}
 
@@ -96,11 +103,36 @@ class Response {
 		$response = json_encode(['VirunusFM' => $this->build_array()]);
 		echo $response;
 	}
-	
-	private function build_array() {
-		$response = [];
-		$response['method'] = $this->method;
+
+	private function build_array()
+	{
+		$response              = [];
+		$response['errors']    = $this->errors;
+		$response['user_info'] = [
+			'username' => $this->username,
+			'client'   => $this->client
+		];
+		$response['method']    = $this->method;
+
+		if ($this->method == 'write') {
+			$y = 0;
+			$n = 0;
+			foreach ($this->listens as $val) {
+				if (in_array(20, $val['status'], true) 
+				    or in_array(24, $val['status'], true)
+				) {
+					$n ++;
+				} else {
+					$y ++;
+				}
+			}
+			$response['success'] = $y;
+			$response['failure'] = $n;
+		} else if ($this->method == 'read') {
+			$response['retrieved'] = count($this->listens);
+		}
 		$response['listens'] = $this->listens;
+
 		return $response;
 	}
 

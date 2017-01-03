@@ -10,7 +10,7 @@ function db_connect()
 	try {
 		$dbh = new PDO("pgsql:host=" . DB_HOSTNAME . ";dbname=" . DB_DATABASE,
 			DB_USERNAME, DB_PASSWORD);
-		$dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+		$dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
 	} catch (PDOException $e) {
 		$dbh = null;
 	}
@@ -31,6 +31,13 @@ abstract class Errors extends BasicEnum {
 	const AUTH = 2;
 	const METHOD = 3;
 	const DATA = 4;
+	
+	const NOT_ENOUGH_DATA = 20;
+	const ARTIST_NOT_FOUND = 21;
+	const ALBUM_NOT_FOUND = 22;
+	const TRACK_NOT_FOUND = 23;
+	const SUBMISSION_FAIL = 24;
+	
 }
 
 abstract class BasicEnum {
@@ -56,11 +63,11 @@ abstract class BasicEnum {
 		}
 		$calledClass = get_called_class();
 		if ( !array_key_exists($calledClass, self::$constCacheArray)) {
-			$reflect                               = new ReflectionClass($calledClass);
-			self::$constCacheArray[ $calledClass ] = $reflect->getConstants();
+			$reflect                             = new ReflectionClass($calledClass);
+			self::$constCacheArray[$calledClass] = $reflect->getConstants();
 		}
 
-		return self::$constCacheArray[ $calledClass ];
+		return self::$constCacheArray[$calledClass];
 	}
 
 	public static function isValidValue($value, $strict = true)
