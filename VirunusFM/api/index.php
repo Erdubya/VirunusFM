@@ -118,7 +118,7 @@ function write($dbh, $response, $listens)
 
 			// Submit listen
 			$stmt = $dbh->prepare("INSERT INTO listens(user_id, artist_id,album_id, track_id, api_key, datetime) VALUES (:user_id, :artist, :album, :track, :client, :datetime)");
-			if (!$stmt->execute([
+			if ( !$stmt->execute([
 				'user_id'  => $response->getUserID(),
 				'artist'   => $artist_id,
 				'album'    => $album_id,

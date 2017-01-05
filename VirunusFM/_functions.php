@@ -31,13 +31,13 @@ abstract class Errors extends BasicEnum {
 	const AUTH = 2;
 	const METHOD = 3;
 	const DATA = 4;
-	
+
 	const NOT_ENOUGH_DATA = 20;
 	const ARTIST_NOT_FOUND = 21;
 	const ALBUM_NOT_FOUND = 22;
 	const TRACK_NOT_FOUND = 23;
 	const SUBMISSION_FAIL = 24;
-	
+
 }
 
 abstract class BasicEnum {

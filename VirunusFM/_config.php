@@ -9,7 +9,6 @@ require_once "_functions.php";
 require_once "vendor/autoload.php";
 error_reporting(E_ALL);
 
-
 define("DB_CONNERR", "Cannot connect to database!");
 define("DB_USERNAME", "virunus");
 define("DB_PASSWORD", "music@work");

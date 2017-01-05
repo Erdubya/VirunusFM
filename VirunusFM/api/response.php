@@ -118,7 +118,7 @@ class Response {
 			$y = 0;
 			$n = 0;
 			foreach ($this->listens as $val) {
-				if (in_array(20, $val['status'], true) 
+				if (in_array(20, $val['status'], true)
 				    or in_array(24, $val['status'], true)
 				) {
 					$n ++;

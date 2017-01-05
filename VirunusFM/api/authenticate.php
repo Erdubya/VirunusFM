@@ -49,7 +49,7 @@ if ($pswd && $clnt) {
 		'iss'  => $server_name,
 		'exp'  => $expires,
 		'data' => [
-			'user_id' =>  $user_id,
+			'user_id'  => $user_id,
 			'username' => $username,
 			'client'   => $client
 		]
